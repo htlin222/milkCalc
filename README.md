@@ -9,8 +9,9 @@
 * if 15ml Q3H, then IV keep 4.7ml/hr
 * if 20ml Q3H, then IV keep 3.0ml/hr
 # U/O: ___ml/kg/hr, normal 2-4 ml/kg/hr
-# Well baby直接吃全量，加奶時大部分每天增加5ml，吃的量比daily fluid少時，其餘量由點滴補充
-(daily fluid-feeding)/24= ? ml/hr 注意單位不一樣
+# Well baby直接吃全量，
+* 加奶時大部分每天增加5ml，吃的量比daily fluid少時，其餘量由點滴補充
+* (daily fluid-feeding)/24= ? ml/hr 注意單位不一樣
 
 # 點滴選擇
 * 第一天only給糖 (常用D10W)
