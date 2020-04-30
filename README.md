@@ -1,5 +1,5 @@
 # milkCalc
-北榮算奶app，請自行用pyinstaller包打
+北榮算奶app，請自行用pyinstaller打包
 
 # Daily fluid(bed side板板)=奶量+點滴
 * 小於37wks: 80(1st day)→90(2nd day) → 100(3rd day)…150 (max)ml/kg/day
