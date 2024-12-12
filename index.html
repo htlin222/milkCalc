@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>台北榮民總醫院兒科加護病房奶量計算機</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #1976d2;
+            margin-bottom: 24px;
+            font-weight: 500;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="number"]:focus {
+            border-color: #1976d2;
+            outline: none;
+        }
+
+        .hint {
+            font-size: 14px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        button {
+            background-color: #1976d2;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #1565c0;
+        }
+
+        #results {
+            margin-top: 24px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .result-item {
+            margin-bottom: 16px;
+            padding: 16px;
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .result-title {
+            color: #1976d2;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>北榮NICU奶量計算</h1>
+        <p style="margin-bottom: 20px;">由PGY林協霆設計於2020四月</p>
+
+        <form id="calcForm">
+            <div class="form-group">
+                <label for="weight">Step 1. 今天的體重 (kg)</label>
+                <input type="number" id="weight" step="0.1" required>
+            </div>
+
+            <div class="form-group">
+                <label for="dailyTotal">Step 2. Daily Total fluid (mL/kg/d)</label>
+                <input type="number" id="dailyTotal" step="0.1" required>
+                <div class="hint">小於37週從80mL/kg/d開始，大於37周則從70mL/kg/d開始，每天加10mL</div>
+            </div>
+
+            <div class="form-group">
+                <label for="ivdrug">Step 3. IV Drug (mL)</label>
+                <input type="number" id="ivdrug" step="0.1" required>
+                <div class="hint">
+                    A. iv keep line給Ampi Q8H+Genta QD: 16mL<br>
+                    B. iv for drug給Ampi Q8H+Genta QD: 40mL
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="feeding">Step 4. 目前每餐可以吃的量 (mL)</label>
+                <input type="number" id="feeding" step="0.1" required>
+            </div>
+
+            <div class="form-group">
+                <label for="freq">Step 5. 頻率</label>
+                <select id="freq" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;">
+                    <option value="3">Q3H</option>
+                    <option value="4">Q4H</option>
+                </select>
+            </div>
+
+            <button type="submit">計算</button>
+        </form>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        function calc(weight, total_subtract_drug, feeding, freq) {
+            const freqNum = freq === 4 ? 6 : 8;
+            const oral = freqNum * feeding;
+            const iv_need = total_subtract_drug - oral;
+            const iv_need_perh = Math.round(iv_need / 24 * 100) / 100;
+
+            let iv_show = "";
+            if (iv_need_perh <= 0) {
+                iv_show = `不用額外點滴，已經可以吃到${Math.round(oral/weight * 100) / 100}mL/kg/d 了！`;
+            } else {
+                iv_show = `還需要${iv_need_perh}cc/hr的點滴`;
+            }
+
+            return [oral, iv_show];
+        }
+
+        document.getElementById('calcForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const weight = parseFloat(document.getElementById('weight').value);
+            const dailyTotal = parseFloat(document.getElementById('dailyTotal').value);
+            const ivdrug = parseFloat(document.getElementById('ivdrug').value);
+            const feeding = parseFloat(document.getElementById('feeding').value);
+            const freq = parseInt(document.getElementById('freq').value);
+
+            const total = Math.round(weight * dailyTotal * 100) / 100;
+            const total_subtract_drug = total - ivdrug;
+
+            // Calculate for current feeding
+            const result = calc(weight, total_subtract_drug, feeding, freq);
+            // Calculate for +5mL
+            const result_5 = calc(weight, total_subtract_drug, feeding + 5, freq);
+            // Calculate for +10mL
+            const result_10 = calc(weight, total_subtract_drug, feeding + 10, freq);
+
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = `
+                <div class="result-item">
+                    <div class="result-title">基本資訊</div>
+                    <p>寶寶今天至少需要 ${total} mL的intake</p>
+                </div>
+
+                <div class="result-item">
+                    <div class="result-title">不加奶的結果</div>
+                    <p>每餐吃${feeding}mL，一天吃${result[0]}mL</p>
+                    <p>減去藥物的${ivdrug}mL</p>
+                    <p>${result[1]}</p>
+                </div>
+
+                <div class="result-item">
+                    <div class="result-title">加5mL的結果</div>
+                    <p>每餐吃${feeding + 5}mL，一天吃${result_5[0]}mL</p>
+                    <p>減去藥物的${ivdrug}mL</p>
+                    <p>${result_5[1]}</p>
+                </div>
+
+                <div class="result-item">
+                    <div class="result-title">加10mL的結果</div>
+                    <p>每餐吃${feeding + 10}mL，一天吃${result_10[0]}mL</p>
+                    <p>減去藥物的${ivdrug}mL</p>
+                    <p>${result_10[1]}</p>
+                </div>
+            `;
+        });
+    </script>
+</body>
+</html>
