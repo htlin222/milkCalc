@@ -1,3 +1,7 @@
+![GitHub stars](https://img.shields.io/github/stars/htlin222/milkCalc?style=flat-square)
+![Last commit](https://img.shields.io/github/last-commit/htlin222/milkCalc?style=flat-square)
+![License](https://img.shields.io/github/license/htlin222/milkCalc?style=flat-square)
+
 # milkCalc
 北榮算奶app，[下載連結](https://github.com/htlin222/milkCalc/raw/master/%E7%AE%97%E5%A5%B6%E9%87%8F.exe)
 
